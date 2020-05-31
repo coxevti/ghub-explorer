@@ -1,7 +1,7 @@
 import React, { useState, FormEvent } from 'react';
 
 import { FiChevronRight } from 'react-icons/fi';
-import { Title, Form, Repository } from './styles';
+import { Title, Form, InputError, Repository } from './styles';
 import logoImg from '../../assets/logo.svg';
 import api from '../../services/api';
 
@@ -16,23 +16,35 @@ interface Repository {
 
 const Dashboard: React.FC = () => {
   const [newRep, setNewRep] = useState('');
+  const [inputError, setInputError] = useState('');
   const [repositories, setRepositories] = useState<Repository[]>([]);
 
   async function handleSubmitForm(
     event: FormEvent<HTMLFormElement>,
   ): Promise<void> {
     event.preventDefault();
-    const response = await api.get<Repository>(`/repos/${newRep}`);
-    const repository = response.data;
-    setRepositories([...repositories, repository]);
-    setNewRep('');
+    if (!newRep) {
+      setInputError('Digite um repositório');
+      return;
+    }
+    try {
+      const response = await api.get<Repository>(`/repos/${newRep}`);
+      const repository = response.data;
+      setRepositories([...repositories, repository]);
+      setNewRep('');
+      setInputError('');
+    } catch (error) {
+      setInputError(
+        'Não encontrado o repositório, verifique o nome e tente novamente',
+      );
+    }
   }
 
   return (
     <>
       <img src={logoImg} alt="GHub Explorer" />
       <Title>Explore repositórios no Github</Title>
-      <Form onSubmit={handleSubmitForm}>
+      <Form hasError={!!inputError} onSubmit={handleSubmitForm}>
         <input
           type="text"
           placeholder="Digite Ex. facebook/react"
@@ -41,6 +53,7 @@ const Dashboard: React.FC = () => {
         />
         <button type="submit">Pesquisar</button>
       </Form>
+      {inputError && <InputError>{inputError}</InputError>}
       <Repository>
         {repositories.map((repository) => (
           <a href="#reactjs" key={repository.full_name}>

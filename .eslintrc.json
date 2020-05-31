@@ -35,6 +35,10 @@
         "allowExpressions": true
       }
     ],
+    "@typescript-eslint/explicit-module-boundary-types": [
+      "error",
+      { "allowHigherOrderFunctions": false }
+    ],
     "import/extensions": [
       "error",
       "ignorePackages",
